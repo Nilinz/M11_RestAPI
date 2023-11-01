@@ -7,7 +7,7 @@ class ContactBase(BaseModel):
     last_name: str
     email: str
     phone_number: str
-    birth_date: date
+    birthday: date
     additional_data: Optional[str] = None
 
 class ContactCreate(ContactBase):
@@ -35,7 +35,7 @@ class ContactResponse(BaseModel):
                         "last_name": "Doe",
                         "email": "john.doe@example.com",
                         "phone_number": "1234567890",
-                        "birth_date": "1990-01-01",
+                        "birthday": "1990-01-01",
                         "additional_data": "Some additional data"
                     },
                     {
@@ -44,7 +44,7 @@ class ContactResponse(BaseModel):
                         "last_name": "Smith",
                         "email": "jane.smith@example.com",
                         "phone_number": "9876543210",
-                        "birth_date": "1985-05-15",
+                        "birthday": "1985-05-15",
                         "additional_data": "More additional data"
                     }
                 ]

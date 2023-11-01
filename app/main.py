@@ -1,9 +1,10 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import timedelta
 from fastapi.middleware.cors import CORSMiddleware
 from . import models, schemas, db
+from .db import get_db
 
 app = FastAPI()
 
@@ -16,20 +17,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def get_db():
-    db = db.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-@app.post("/contacts/", response_model=schemas.Contact)
+@app.post("/contacts/", response_model=schemas.Contact, status_code=status.HTTP_201_CREATED)
 def create_contact(contact: schemas.ContactCreate, db: Session = Depends(get_db)):
     db_contact = models.Contact(**contact.dict())
     db.add(db_contact)
     db.commit()
     db.refresh(db_contact)
     return db_contact
+
 
 @app.get("/contacts/", response_model=schemas.ContactResponse)
 def read_contacts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
@@ -79,7 +74,7 @@ def upcoming_birthdays(days: int = 7, db: Session = Depends(get_db)):
     today = db.query(db.func.current_date()).scalar()
     end_date = today + timedelta(days=days)
     contacts = db.query(models.Contact).filter(
-        (db.func.extract('month', models.Contact.birth_date) == db.func.extract('month', today)) &
-        (db.func.extract('day', models.Contact.birth_date) <= db.func.extract('day', end_date))
+        (db.func.extract('month', models.Contact.birthday) == db.func.extract('month', today)) &
+        (db.func.extract('day', models.Contact.birthday) <= db.func.extract('day', end_date))
     ).all()
     return contacts
